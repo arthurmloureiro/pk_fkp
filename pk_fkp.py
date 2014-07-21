@@ -14,11 +14,11 @@ import sys
 from scipy import interpolate
 
 
-########################################
-# Reading the input file and converting 
-########################################
-camb_file, cell_size, n_x, n_y, n_z, num_realiz, bias, num_bins = np.loadtxt('input.dat', dtype=str)
-cell_size = float(cell_size); n_x=int(n_x); n_y=int(n_y); n_z=int(n_z); num_realiz=int(num_realiz); bias=float(bias) ; num_bins=int(num_bins);
+#################################################
+# Reading the input file and converting the data
+#################################################
+camb_file, cell_size, n_x, n_y, n_z, num_realiz, bias, num_bins, n_bar, realiz_type = np.loadtxt('input.dat', dtype=str)
+cell_size = float(cell_size); n_x=int(n_x); n_y=int(n_y); n_z=int(n_z); num_realiz=int(num_realiz); bias=float(bias) ; num_bins=int(num_bins); realiz_type = int(realiz_type); n_bar = float(n_bar);
 
 ######################
 # Reading CAMB's file
@@ -26,7 +26,7 @@ cell_size = float(cell_size); n_x=int(n_x); n_y=int(n_y); n_z=int(n_z); num_real
 k_camb , Pk_camb = np.loadtxt(camb_file, unpack=True)
 k_camb = np.insert(k_camb,0,0.)						
 Pk_camb = np.insert(Pk_camb,0,0.)		
-Pk_camb_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_camb)		     #interpolate camb's Power Spectrum
+Pk_camb_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_camb)	     #interpolate camb's Power Spectrum
 
 #######################
 # Initial calculations
@@ -57,7 +57,7 @@ corr_g = np.log(1.+corr_ln) 							     # Gaussian Correl. Func.
 ######################################
 # Finding the gaussian power spectrum
 ######################################
-print("Calculating the Gaussian P(k)...\n")
+print("Calculating the Gaussian P(k)...\n Any Error Warning here is expected. \n")
 dr = np.diff(r_k)
 dr = np.append(dr,[0.0])
 rkr = np.einsum('i,j', r_k,k_camb)
@@ -74,8 +74,109 @@ Pk_gauss_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_gauss)
 ###############################################################
 # Generating the P(K) grid using the gaussian interpolated Pkg
 ###############################################################
+print("\nCalculating the P(k)-Grid...\n")
+Pkg_vec = np.vectorize(Pk_gauss_interp)
+p_matrix = Pkg_vec(k_grid.matrix)
+p_matrix[0][0][0] = 1. 								     # Needs to be 1.
+######################
+# Defining the p.d.fs 
+######################
+def A_k(P_):									     # The Gaussian Amplitude #
+	return np.random.normal(0.0,np.sqrt(2.*P_*box_vol))			     # Zero Medium and STD=SQRT(2*P(k)*Volume)
+										     # It must have the 2 factor to take the complex
+										     # part into account after the iFFT
 
-#Seguir de onde este comentário para em pk.py
+def phi_k(P_): 									     # Random regular phase #
+	return (np.random.random(len(P_)))*2.*np.pi	
+
+def delta_k_g(P_):								     # The density contrast in Fourier Space
+	return A_k(P_)*np.exp(1j*phi_k(P_))		
+
+###############################
+# the log-normal density field
+###############################
+def delta_x_ln(d_,sigma_):
+	return np.exp(bias*d_ - ((bias**2.)*(sigma_))/2.0) -1.
+
+################################################################
+# FFT Loops for Gaussian and Gaussian + Poissonian Realizations
+################################################################
+k_bar = np.arange(0,num_bins,1)*(np.max(k_grid.matrix)/num_bins)
+
+if realiz_type == 1:
+	print "Doing both Gaussian + Poissonian realizations... \n"
+	for m in range(num_realiz):
+		#########################
+		# gaussian density field
+		#########################
+		delta_x_gaus = ((delta_k_g(p_matrix).size)/box_vol)*np.fft.ifftn(delta_k_g(p_matrix))	#the iFFT
+		var_gr = np.var(delta_x_gaus.real)
+		var_gi = np.var(delta_x_gaus.imag)
+		delta_xr_g = delta_x_gaus.real
+		delta_xi_g = delta_x_gaus.imag
+		###########################
+		# Log-Normal Density Field
+		###########################
+		delta_xr = delta_x_ln(delta_xr_g, var_gr)
+		delta_xi = delta_x_ln(delta_xi_g, var_gi)
+		#######################
+		#poissonian realization
+		#######################
+		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
+		N_i = np.random.poisson(n_bar*(1.+delta_xi))
+		
+		##########################################
+		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
+		##########################################
+		
+	print "\nDone.\n"
+elif realiz_type == 2:
+	print "Doing Poissonian realizations only \n"
+	#########################
+	# gaussian density field
+	#########################
+	delta_x_gaus = ((delta_k_g(p_matrix).size)/box_vol)*np.fft.ifftn(delta_k_g(p_matrix))	#the iFFT
+	var_gr = np.var(delta_x_gaus.real)
+	var_gi = np.var(delta_x_gaus.imag)
+	delta_xr_g = delta_x_gaus.real
+	delta_xi_g = delta_x_gaus.imag
+	###########################
+	# Log-Normal Density Field
+	###########################
+	delta_xr = delta_x_ln(delta_xr_g, var_gr)
+	delta_xi = delta_x_ln(delta_xi_g, var_gi)
+	for m in range(num_realiz):
+		#######################
+		#poissonian realization
+		#######################
+		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
+		N_i = np.random.poisson(n_bar*(1.+delta_xi))
+		
+		##########################################
+		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
+		##########################################
+	print "\nDone.\n" 
+else:
+	print "Error, invalid option for realization's type \n"
+	sys.exit(-1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

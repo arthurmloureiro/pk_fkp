@@ -32,7 +32,7 @@ fid_matterpower.dat
 ###########################################
 # Number of realizations (must be integer)
 ###########################################
-500
+50
 
 #######
 # Bias
@@ -43,6 +43,18 @@ fid_matterpower.dat
 # Number of bins to estimate P(k) (must be integer)
 ####################################################
 45
+
+#############################################
+# Medium number of galaxies per cell (n_bar)
+#############################################
+30.
+
+################################################
+# Which kind of realizations to very? 
+#(1) Gaussian + Poissonian (2) Poissonian Only
+################################################
+2
+
 
 # MUST IMPLEMENT THE SELECTION FUNCTION HERE
 
