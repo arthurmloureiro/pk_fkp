@@ -11,21 +11,23 @@
 import numpy as np
 import grid3D as gr
 import sys
+from time import clock
 from scipy import interpolate
-
+import pylab as pl
+from matplotlib import cm
 
 #################################################
 # Reading the input file and converting the data
 #################################################
-camb_file, cell_size, n_x, n_y, n_z, num_realiz, bias, num_bins, n_bar, realiz_type = np.loadtxt('input.dat', dtype=str)
-cell_size = float(cell_size); n_x=int(n_x); n_y=int(n_y); n_z=int(n_z); num_realiz=int(num_realiz); bias=float(bias) ; num_bins=int(num_bins); realiz_type = int(realiz_type); n_bar = float(n_bar);
+camb_file, cell_size, n_x, n_y, n_z, num_realiz, bias, num_bins, n_bar0, realiz_type = np.loadtxt('input.dat', dtype=str)
+cell_size = float(cell_size); n_x=int(n_x); n_y=int(n_y); n_z=int(n_z); num_realiz=int(num_realiz); bias=float(bias) ; num_bins=int(num_bins); realiz_type = int(realiz_type); n_bar0 = float(n_bar0);
 
 ######################
 # Reading CAMB's file
 ######################
 k_camb , Pk_camb = np.loadtxt(camb_file, unpack=True)
 k_camb = np.insert(k_camb,0,0.)						
-Pk_camb = np.insert(Pk_camb,0,0.)		
+Pk_camb = np.insert(Pk_camb,0,0.)
 Pk_camb_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_camb)	     #interpolate camb's Power Spectrum
 
 #######################
@@ -34,7 +36,7 @@ Pk_camb_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_camb)	     #
 L_x = n_x*cell_size ; L_y = n_y*cell_size ; L_z = n_z*cell_size 		     # size of the box
 box_vol = L_x*L_y*L_z								     # Box's volume
 print("Generating the k-space Grid...\n")
-k_grid = gr.grid3d(n_x,n_y,n_z,L_x,L_y,L_z)					     # generates the k-grid
+grid = gr.grid3d(n_x,n_y,n_z,L_x,L_y,L_z)					     # generates the k-grid
 
 ######################################
 # Finding Camb's Correlation Function
@@ -69,15 +71,15 @@ integrando2 = sinrk2*terms
 
 Pk_gauss = 4.0*np.pi*np.sum(integrando2, axis=0)
 Pk_gauss[0] = 0.0
-Pk_gauss_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_gauss)	
-
+#Pk_gauss_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_gauss)	
+Pk_gauss_interp = interpolate.UnivariateSpline(k_camb,Pk_gauss)	
 ###############################################################
 # Generating the P(K) grid using the gaussian interpolated Pkg
 ###############################################################
 print("\nCalculating the P(k)-Grid...\n")
 Pkg_vec = np.vectorize(Pk_gauss_interp)
-p_matrix = Pkg_vec(k_grid.matrix)
-p_matrix[0][0][0] = 1. 								     # Needs to be 1.
+p_matrix = Pkg_vec(grid.grid_k)
+p_matrix[0][0][0] = 1. 						     # Needs to be 1.
 ######################
 # Defining the p.d.fs 
 ######################
@@ -97,12 +99,20 @@ def delta_k_g(P_):								     # The density contrast in Fourier Space
 ###############################
 def delta_x_ln(d_,sigma_):
 	return np.exp(bias*d_ - ((bias**2.)*(sigma_))/2.0) -1.
+	
+###################
+# Selection funtion
+###################
+def phi_selec(r_,al):
+	return 1. -al*r_
+phi_selec_vec = np.vectorize(phi_selec)
+n_bar = phi_selec_vec(grid.grid_r,np.power(n_x,-3.))*n_bar0
 
 ################################################################
 # FFT Loops for Gaussian and Gaussian + Poissonian Realizations
 ################################################################
-k_bar = np.arange(0,num_bins,1)*(np.max(k_grid.matrix)/num_bins)
-
+k_bar = np.arange(0,num_bins,1)*(np.max(grid.grid_k)/num_bins)
+inicial = clock()
 if realiz_type == 1:
 	print "Doing both Gaussian + Poissonian realizations... \n"
 	for m in range(num_realiz):
@@ -123,7 +133,7 @@ if realiz_type == 1:
 		#poissonian realization
 		#######################
 		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar*(1.+delta_xi))
+		N_i = np.random.poisson(n_bar0*(1.+delta_xi))
 		
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
@@ -150,7 +160,7 @@ elif realiz_type == 2:
 		#poissonian realization
 		#######################
 		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar*(1.+delta_xi))
+		N_i = np.random.poisson(n_bar0*(1.+delta_xi))
 		
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
@@ -160,7 +170,13 @@ else:
 	print "Error, invalid option for realization's type \n"
 	sys.exit(-1)
 
-
+final = clock()
+print "time = " + str(final - inicial)		
+pl.figure()
+pl.imshow(N_r[2], cmap=cm.jet)
+pl.figure()
+pl.imshow(N_i[2], cmap=cm.jet)
+pl.show()
 
 
 
