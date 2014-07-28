@@ -13,7 +13,7 @@
 """
 import numpy as np
 import pylab as pl
-from mpl_toolkits.mplot3d.axes3d import Axes3D
+#from mpl_toolkits.mplot3d.axes3d import Axes3D
 #from matplotlib import cm
 ####################################################
 # Uncomment the line above and the last three lines 
@@ -40,28 +40,18 @@ class grid3d:
 		###################################################################
 		# it has to be up to m/2 + 1 because of the structure of np.arange
 		###################################################################
-		prime_x=np.arange(1,(n_x/2+1),1)*kx0		
-		invert_prime_x = -prime_x[::-1]			
-		prime_x = np.insert(prime_x, 0,0)		
-		self.k_x = np.append(prime_x,invert_prime_x)		
-		ident = np.ones_like(self.k_x)
+		self.k_x = (n_x)*np.fft.fftfreq(n_x)*kx0
+		identx = np.ones_like(self.k_x)
 
+		self.k_y = (n_y)*np.fft.fftfreq(n_y)*ky0
+		identy = np.ones_like(self.k_y)	
 
-		prime_y=np.arange(1,(n_y/2+1),1)*ky0		
-		invert_prime_y = -prime_y[::-1]			
-		prime_y = np.insert(prime_y, 0,0)		
-		self.k_y = np.append(prime_y,invert_prime_y)		
-
-
-		prime_z=np.arange(1,(n_z/2+1),1)*kz0		
-		invert_prime_z = -prime_z[::-1]			
-		prime_z = np.insert(prime_z, 0,0)		
-		self.k_z = np.append(prime_z,invert_prime_z)	
+		self.k_z = (n_z)*np.fft.fftfreq(n_z)*kz0
+		identz = np.ones_like(self.k_z)	
 		
-		self.KX2 = np.einsum('i,j,k', self.k_x*self.k_x,ident,ident)
-		self.KY2 = np.einsum('i,j,k', ident,self.k_y*self.k_y,ident)
-		self.KZ2 = np.einsum('i,j,k', ident,ident,self.k_z*self.k_z)
-		
+		self.KX2 = np.einsum('i,j,k', self.k_x*self.k_x,identx,identx)
+		self.KY2 = np.einsum('i,j,k', identy,self.k_y*self.k_y,identy)
+		self.KZ2 = np.einsum('i,j,k', identz,identz,self.k_z*self.k_z)
 		
 		self.matrix = np.sqrt(self.KX2 + self.KY2 + self.KZ2)
 
