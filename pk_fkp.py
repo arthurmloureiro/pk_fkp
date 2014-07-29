@@ -54,8 +54,8 @@ termo2=np.einsum('i,j',dkkPk,rm1)
 integrando=sinkr*termo2
 
 corr_ln=np.power(2.0*np.pi*np.pi,-1.0)*np.sum(integrando,axis=0)       		     # uses the trace in the r axis to make the integral
-
-corr_g = np.log(1.+corr_ln) 							     # Gaussian Correl. Func.
+corr_g = np.log(1.+corr_ln) 	
+						     # Gaussian Correl. Func.
 ######################################
 # Finding the gaussian power spectrum
 ######################################
@@ -73,6 +73,7 @@ Pk_gauss = 4.0*np.pi*np.sum(integrando2, axis=0)
 Pk_gauss[0] = 0.0
 #Pk_gauss_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_gauss)	
 Pk_gauss_interp = interpolate.UnivariateSpline(k_camb,Pk_gauss)	
+
 ###############################################################
 # Generating the P(K) grid using the gaussian interpolated Pkg
 ###############################################################
@@ -100,13 +101,15 @@ def delta_k_g(P_):								     # The density contrast in Fourier Space
 def delta_x_ln(d_,sigma_):
 	return np.exp(bias*d_ - ((bias**2.)*(sigma_))/2.0) -1.
 	
-###################
+####################
 # Selection funtion
-###################
+####################
 def phi_selec(r_,al):
-	return 1. -al*r_
+	return np.exp(-al*r_)
 phi_selec_vec = np.vectorize(phi_selec)
-n_bar = phi_selec_vec(grid.grid_r,np.power(n_x,-3.))*n_bar0
+n_bar = phi_selec_vec(grid.grid_r,np.power(n_x,-0.55))*n_bar0
+
+N_bar_bins=np.zeros(((num_bins,num_bins,num_bins)))
 
 ################################################################
 # FFT Loops for Gaussian and Gaussian + Poissonian Realizations
@@ -134,7 +137,17 @@ if realiz_type == 1:
 		#######################
 		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
 		N_i = np.random.poisson(n_bar0*(1.+delta_xi))
-		
+		n_bar0_new = np.mean(N_r)
+		#############################
+		# Spliting the Map into bins
+		#############################
+		Nx = np.split(N_r,num_bins)
+		for i in range(len(Nx)):
+			Nxy = np.split(Nx[i], num_bins, axis=1)
+			for j in range(len(Nxy)):
+				Nxyz = np.split(Nxy[j], num_bins, axis=2)
+				for l in range(len(Nxyz)):
+					N_bar_bins[i][j][l] = np.mean(Nxyz[l])	
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
 		##########################################
@@ -161,7 +174,17 @@ elif realiz_type == 2:
 		#######################
 		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
 		N_i = np.random.poisson(n_bar0*(1.+delta_xi))
-		
+		n_bar0_new = np.mean(N_r)
+		#############################
+		# Spliting the Map into bins
+		#############################
+		Nx = np.split(N_r,num_bins)
+		for i in range(len(Nx)):
+			Nxy = np.split(Nx[i], num_bins, axis=1)
+			for j in range(len(Nxy)):
+				Nxyz = np.split(Nxy[j], num_bins, axis=2)
+				for l in range(len(Nxyz)):
+					N_bar_bins[i][j][l] = np.mean(Nxyz[l])	
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
 		##########################################
@@ -176,7 +199,10 @@ pl.figure()
 pl.imshow(N_r[2], cmap=cm.jet)
 pl.figure()
 pl.imshow(N_i[2], cmap=cm.jet)
+pl.figure()
+pl.imshow(N_bar_bins[1], cmap=cm.jet, interpolation="nearest")
 pl.show()
+
 
 
 
