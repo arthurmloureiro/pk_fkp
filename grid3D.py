@@ -13,8 +13,8 @@
 """
 import numpy as np
 import pylab as pl
-#from mpl_toolkits.mplot3d.axes3d import Axes3D
-#from matplotlib import cm
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+from matplotlib import cm
 ####################################################
 # Uncomment the line above and the last three lines 
 # if you have matplotlib and want to see the grid
@@ -53,9 +53,22 @@ class grid3d:
 		self.KY2 = np.einsum('i,j,k', identy,self.k_y*self.k_y,identy)
 		self.KZ2 = np.einsum('i,j,k', identz,identz,self.k_z*self.k_z)
 		
-		self.matrix = np.sqrt(self.KX2 + self.KY2 + self.KZ2)
+		self.grid_k = np.sqrt(self.KX2 + self.KY2 + self.KZ2)
 
-#		pl.figure("Matriz de k")
+		####################################################		
+		# Generating a grid a real space, uses grid unities
+		####################################################
+		r_x = np.arange(n_x)
+		r_y = np.arange(n_y)
+		r_z = np.arange(n_z)
+		self.RX2 = np.einsum('i,j,k', r_x*r_x,identx,identx)
+		self.RY2 = np.einsum('i,j,k', identy,r_y*r_y,identy)
+		self.RZ2 = np.einsum('i,j,k', identz,identz,r_z*r_z)
+		self.grid_r = np.sqrt(self.RX2 + self.RY2 + self.RZ2)
+
+
+		pl.figure("Matriz de k")
 #		self.plot = pl.imshow(self.matrix[3], cmap=cm.jet)
+		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)
 		#self.plothist = pl.imshow(self.hist[3], cmap=cm.jet)
 		#pl.show()
