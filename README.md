@@ -11,4 +11,5 @@ Recent Modifications:
 ---
 - 18/07/2014 - Repository Created, *grid3D.py* cloned, *input file* crated, implemented part of the *pk.py* code in the main code [A]
 - 21/07/2014 - Main code ready and waiting for the implementation of the fkp part [A]
-- 28/07/2014 - grid3d.py now uses np.fft.fftfreq to generate the k-grid an generates a r-grid also. Main code modified to contain the selection function n_bar
+- 28/07/2014 - grid3d.py now uses np.fft.fftfreq to generate the k-grid an generates a r-grid also. Main code modified to contain the selection function n_bar [A]
+- 29/07/2014 - Selection function working and bin-grid also working [A]
