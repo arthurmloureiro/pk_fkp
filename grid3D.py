@@ -58,9 +58,9 @@ class grid3d:
 		####################################################		
 		# Generating a grid a real space, uses grid unities
 		####################################################
-		r_x = np.arange(n_x)
-		r_y = np.arange(n_y)
-		r_z = np.arange(n_z)
+		r_x = np.arange(n_x)#*(L_x/n_x)
+		r_y = np.arange(n_y)#*(L_y/n_y)
+		r_z = np.arange(n_z)#*(L_z/n_z)
 		self.RX2 = np.einsum('i,j,k', r_x*r_x,identx,identx)
 		self.RY2 = np.einsum('i,j,k', identy,r_y*r_y,identy)
 		self.RZ2 = np.einsum('i,j,k', identz,identz,r_z*r_z)
@@ -68,7 +68,9 @@ class grid3d:
 
 
 		pl.figure("Matriz de k")
+
 #		self.plot = pl.imshow(self.matrix[3], cmap=cm.jet)
-		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)
+		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)#, interpolation="nearest")
+#		pl.colorbar()
 		#self.plothist = pl.imshow(self.hist[3], cmap=cm.jet)
 		#pl.show()

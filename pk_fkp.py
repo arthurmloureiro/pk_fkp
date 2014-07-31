@@ -36,8 +36,9 @@ Pk_camb_interp = interpolate.InterpolatedUnivariateSpline(k_camb,Pk_camb)	     #
 L_x = n_x*cell_size ; L_y = n_y*cell_size ; L_z = n_z*cell_size 		     # size of the box
 box_vol = L_x*L_y*L_z								     # Box's volume
 print("Generating the k-space Grid...\n")
-grid = gr.grid3d(n_x,n_y,n_z,L_x,L_y,L_z)					     # generates the k-grid
-
+grid = gr.grid3d(n_x,n_y,n_z,L_x,L_y,L_z)					     # generates the grid
+grid_bins = gr.grid3d(num_bins, num_bins, num_bins, L_x,L_y,L_z)		     # generates the bins grid
+										     # multiplying the grid for the cell_size will give us a grid in physical units 
 ######################################
 # Finding Camb's Correlation Function
 ######################################
@@ -104,10 +105,15 @@ def delta_x_ln(d_,sigma_):
 ####################
 # Selection funtion
 ####################
-def phi_selec(r_,al):
-	return np.exp(-al*r_)
+def phi_selec(r_):
+	#f1 = np.exp(-(r_*r_)/(2.*al*al))
+	#norm = np.sqrt(2.*np.pi)*al
+	#return f1/norm
+	a1 = np.power((r_ - 350.),2.)/((950.)**2.)
+	a2 = np.power((r_-400.), 2.)/((930.)**2.)
+	return (2.7)*np.exp(-a1-a2)
 phi_selec_vec = np.vectorize(phi_selec)
-n_bar = phi_selec_vec(grid.grid_r,np.power(n_x,-0.55))*n_bar0
+n_bar = phi_selec_vec(grid.grid_r*cell_size)*n_bar0
 
 N_bar_bins=np.zeros(((num_bins,num_bins,num_bins)))
 
@@ -116,6 +122,7 @@ N_bar_bins=np.zeros(((num_bins,num_bins,num_bins)))
 ################################################################
 k_bar = np.arange(0,num_bins,1)*(np.max(grid.grid_k)/num_bins)
 inicial = clock()
+pl.figure()
 if realiz_type == 1:
 	print "Doing both Gaussian + Poissonian realizations... \n"
 	for m in range(num_realiz):
@@ -135,8 +142,8 @@ if realiz_type == 1:
 		#######################
 		#poissonian realization
 		#######################
-		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar0*(1.+delta_xi))
+		N_r = np.random.poisson(n_bar*(1.+delta_xr)*(cell_size**3.))			     # This is the final galaxy Map
+		N_i = np.random.poisson(n_bar0*(1.+delta_xi)*(cell_size**3.))
 		n_bar0_new = np.mean(N_r)
 		#############################
 		# Spliting the Map into bins
@@ -147,7 +154,14 @@ if realiz_type == 1:
 			for j in range(len(Nxy)):
 				Nxyz = np.split(Nxy[j], num_bins, axis=2)
 				for l in range(len(Nxyz)):
-					N_bar_bins[i][j][l] = np.mean(Nxyz[l])	
+					N_bar_bins[i][j][l] = np.mean(Nxyz[l])/(cell_size**3.)
+		#pol_coef = np.polyfit(grid_bins.grid_r[0][0], np.log(N_bar_bins[0][0]),4 )
+		#fit = np.poly1d(pol_coef)
+		#pol_coef2 = np.polyfit(grid_bins.grid_r[0][0], np.log(N_bar_bins[0][0]),3 )
+		#fit2 = np.poly1d(pol_coef2)
+		#pl.plot(fit(grid_bins.grid_r[0][0]),color="r")
+		#pl.plot(fit2(grid_bins.grid_r[0][0]),color="k")
+		pl.plot(np.log(N_bar_bins[0][0]), linewidth=1, color="k")
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
 		##########################################
@@ -172,8 +186,8 @@ elif realiz_type == 2:
 		#######################
 		#poissonian realization
 		#######################
-		N_r = np.random.poisson(n_bar*(1.+delta_xr))			     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar0*(1.+delta_xi))
+		N_r = np.random.poisson(n_bar*(1.+delta_xr)*(cell_size**3.))			     # This is the final galaxy Map
+		N_i = np.random.poisson(n_bar0*(1.+delta_xi)*(cell_size**3.))
 		n_bar0_new = np.mean(N_r)
 		#############################
 		# Spliting the Map into bins
@@ -184,7 +198,10 @@ elif realiz_type == 2:
 			for j in range(len(Nxy)):
 				Nxyz = np.split(Nxy[j], num_bins, axis=2)
 				for l in range(len(Nxyz)):
-					N_bar_bins[i][j][l] = np.mean(Nxyz[l])	
+					N_bar_bins[i][j][l] = np.mean(Nxyz[l])
+		pol_coef = np.polyfit(grid_bins.grid_r[0][0], np.log(N_bar_bins[0][0]),4 )
+		fit = np.poly1d(pol_coef)
+		pl.plot(fit(grid_bins.grid_r[0][0]), color="r")
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
 		##########################################
@@ -193,12 +210,14 @@ else:
 	print "Error, invalid option for realization's type \n"
 	sys.exit(-1)
 
+#pl.plot(np.log(N_bar_bins[0][0]), linewidth=2)
+pl.plot(np.log(phi_selec((grid_bins.grid_r[0][0]*5.*cell_size))*n_bar0),linewidth=2.5)
 final = clock()
 print "time = " + str(final - inicial)		
 pl.figure()
-pl.imshow(N_r[2], cmap=cm.jet)
+pl.imshow(N_r[0], cmap=cm.jet)
 pl.figure()
-pl.imshow(N_i[2], cmap=cm.jet)
+pl.imshow(N_i[0], cmap=cm.jet)
 pl.figure()
 pl.imshow(N_bar_bins[1], cmap=cm.jet, interpolation="nearest")
 pl.show()
