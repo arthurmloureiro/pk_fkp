@@ -6,6 +6,9 @@ Table of content
 - **grid3D.py** - class that generates the 3D-grid in Fourier Space in a way that respects python's FFT algorithm, also a grid in real space
 - **pk_fkp.py** - main body of the program
 - **input.dat** - the input file for the main program
+- **fkp.py** - standard FKP estimator 
+- **cic.py** - cloud-in-cell mass assignment scheme
+- **ngp.py** - nearest-grid-point mass assignment scheme
 
 Recent Modifications:
 ---
