@@ -7,54 +7,56 @@
 ##############################################
 # Insert CAMB's Power Spectra file name here:
 ##############################################
-fid_matterpower.dat
+fid2_matterpower.dat
 
 ##############################
 # Size of the cell in h^-1Mpc
 ##############################
-15.10
+15.0
 
 #######################################################
 # Number of cells in the X direction (must be integer)
 #######################################################
-81
+61
 
 #######################################################
 # Number of cells in the Y direction (must be integer)
 #######################################################
-81
+61
 
 #######################################################
 # Number of cells in the Z direction (must be integer)
 #######################################################
-81
+61
 
 ###########################################
 # Number of realizations (must be integer)
 ###########################################
-50
+100
 
 #######
 # Bias
 #######
-1.01
+1.00
+1.30
 
 ####################################################
 # Number of bins to estimate P(k) (must be integer)
 ####################################################
-45
+80
 
-#############################################
-# Medium number of galaxies per cell (n_bar)
-#############################################
-30.
+####################################################
+# Medium number of galaxies per cell_volume (n_bar)
+####################################################
+1.0
+1.0
+
 
 ################################################
-# Which kind of realizations to very? 
+# Which kind of realizations to vary? 
 #(1) Gaussian + Poissonian (2) Poissonian Only
 ################################################
 2
 
 
 # MUST IMPLEMENT THE SELECTION FUNCTION HERE
-

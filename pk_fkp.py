@@ -43,26 +43,26 @@ grid_bins = gr.grid3d(num_bins, num_bins, num_bins, L_x,L_y,L_z)		     # generat
 										    						 		 # multiplying the grid for the cell_size will give us a grid in physical units 
 
 k_min = np.min(k_camb[1:])
-k_max = (4.*np.pi)/cell_size
-k_step = 1./L_max
+k_max = (2.*np.pi)/cell_size
+k_step = (1./L_max)*(1./1.1)													# the 1/3. is Raul's idea
 
 
-k_r = np.arange(k_min,k_max,k_step)
+k_r = np.arange(k_min,3.*k_max,k_step)											# the 3*k_max is Raul's idea
 
 ######################################
 # Finding Camb's Correlation Function
 ######################################
 print("Finding the Correlation Function...\n")
-r_max = (np.pi)/np.min(k_r[1:])
-r_step = 1./np.max(grid.grid_k)
-r_k=1.0*np.arange(1.,r_max,r_step)                                            
+r_max = (np.pi)/np.min(k_r[1:])*(0.3)										# Raul's ....
+r_step = 1./np.max(grid.grid_k)*(2./3.)										# (2./3.) also Raul's idea
+r_k=1.0*np.arange(0.0001,r_max,r_step)                                            
 
 dk_r=np.diff(k_r)                                           			     # makes the diff between k and k + dk
 dk_r=np.append(dk_r,[0.0])
 
 krk=np.einsum('i,j',k_r,r_k)
 sinkr=np.sin(krk)
-dkkPk=dk_r*k_r*Pk_camb_interp(k_r)*np.exp(-1.0*np.power(k_r/(k_max),6.0))
+dkkPk=dk_r*k_r*Pk_camb_interp(k_r)*np.exp(-1.0*np.power(k_r/(2.*k_max),6.0))
 rm1=np.power(r_k,-1.0)
 termo2=np.einsum('i,j',dkkPk,rm1)
 integrando=sinkr*termo2
@@ -91,7 +91,7 @@ km1 = np.power(k_r,-1.)
 terms = np.einsum('i,j', drCorr,km1)
 integrando2 = sinrk2*terms
 
-Pk_gauss = 4.0*np.pi*np.sum(integrando2, axis=0)
+Pk_gauss = 4.27*np.pi*np.sum(integrando2, axis=0)				# o fator na frente é originalmente 4!
 Pk_gauss[0] = Pk_camb[1]
 
 Pk_gauss_interp = interpolate.UnivariateSpline(k_r,Pk_gauss)	
@@ -104,14 +104,14 @@ pl.figure()
 pl.ylim(0.,10E6)
 pl.loglog() 
 pl.plot(k_camb, Pk_camb_interp(k_camb))
-pl.plot(k_camb, Pk_camb_interp(k_camb)*np.exp(-1.0*np.power(k_camb/(k_max),6.0)))
+pl.plot(k_camb, Pk_camb_interp(k_camb)*np.exp(-1.0*np.power(k_camb/(2.*k_max),6.0)))
 pl.plot(k_r, Pk_gauss_interp(k_r),'--' ,linewidth=2.5)
 pl.axvline(x=np.max(grid.grid_k), linewidth=2., color='r')
 pl.axvline(x=np.min(grid.grid_k[grid.grid_k!=0.0]), linewidth=2., color='g')
 pl.plot(k_r,Pk_gauss)
 pl.show()
 
-#sys.exit()
+sys.exit()
 
 
 
@@ -254,8 +254,6 @@ pl.errorbar(k_bar[1:], PN_mean2, yerr=error_bar2)
 pl.figure()
 pl.imshow(N_r1[0], cmap=cm.jet)
 pl.show()
-
-
 
 
 
