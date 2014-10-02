@@ -111,7 +111,7 @@ pl.axvline(x=np.min(grid.grid_k[grid.grid_k!=0.0]), linewidth=2., color='g')
 pl.plot(k_r,Pk_gauss)
 pl.show()
 
-sys.exit()
+#sys.exit()
 
 
 
@@ -249,11 +249,11 @@ print "time = " + str(final - inicial)
 pl.figure()
 pl.loglog()
 pl.errorbar(k_bar[1:], PN_mean1, yerr=error_bar1)
+pl.plot(k_camb,Pk_camb)
 pl.errorbar(k_bar[1:], PN_mean2, yerr=error_bar2)
 pl.figure()
 pl.imshow(N_r1[0], cmap=cm.jet)
 pl.show()
-
 
 
 
