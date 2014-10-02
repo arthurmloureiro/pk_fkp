@@ -46,16 +46,16 @@ grid_bins = gr.grid3d(num_bins, num_bins, num_bins, L_x,L_y,L_z)		     # generat
 # This will be used to calculate the Gaussian P(k)
 ###################################################
 k_min = np.min(k_camb[1:])									     
-k_max = (4.*np.pi)/cell_size										     
-k_step = 1./L_max
-k_r = np.arange(k_min,k_max,k_step)
+k_max = (2.*np.pi)/cell_size										     
+k_step = 1./L_max*(1./1.1)
+k_r = np.arange(k_min,3.*k_max,k_step)
 
 ######################################
 # Finding Camb's Correlation Function
 ######################################
 print("Finding the Correlation Function...\n")
-r_max = (np.pi)/np.min(k_r[1:])
-r_step = 1./np.max(grid.grid_k)
+r_max = (np.pi)/np.min(k_r[1:])*(0.3)										#there's no acctual reason to choose this 0.3
+r_step = 1./np.max(grid.grid_k)*(2./3.)
 r_k=1.0*np.arange(1.,r_max,r_step)
 
 dk_r=np.diff(k_r)                                           			     # makes the diff between k and k + dk
@@ -63,7 +63,7 @@ dk_r=np.append(dk_r,[0.0])
 
 krk=np.einsum('i,j',k_r,r_k)
 sinkr=np.sin(krk)
-dkkPk=dk_r*k_r*Pk_camb_interp(k_r)*np.exp(-1.0*np.power(k_r/(k_max),6.0))
+dkkPk=dk_r*k_r*Pk_camb_interp(k_r)*np.exp(-1.0*np.power(k_r/(2.*k_max),6.0))
 rm1=np.power(r_k,-1.0)
 termo2=np.einsum('i,j',dkkPk,rm1)
 integrando=sinkr*termo2
@@ -84,7 +84,7 @@ km1 = np.power(k_r,-1.)
 terms = np.outer(dCorr,km1)
 integrando2 = sinrk2*terms
 
-Pk_gauss = 4.0*np.pi*np.sum(integrando2, axis=0)
+Pk_gauss = 4.27*np.pi*np.sum(integrando2, axis=0)								#the true constant is 4.0 not 4.27
 Pk_gauss[0] = Pk_camb[1]
 
 Pk_gauss_interp = interpolate.UnivariateSpline(k_r,Pk_gauss)	
@@ -206,7 +206,6 @@ print "time = " + str(final - inicial)
 pl.figure()
 pl.imshow(N_r[0], cmap=cm.jet)
 pl.show()
-
 
 
 
