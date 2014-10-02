@@ -17,3 +17,4 @@ Recent Modifications:
 - 28/07/2014 - grid3d.py now uses np.fft.fftfreq to generate the k-grid an generates a r-grid also. Main code modified to contain the selection function n_bar [A]
 - 29/07/2014 - Selection function working and bin-grid also working [A]
 - 08/09/2014 - Branch "multi-tracer" modification to use more than 1 bias, estimate the galaxy power spectrum as in the pk.py program. Basically the pk.py code for multi-tracers [A] 
+- 02/10/2014 - Correcting the integral for the Corr Func and the Gaussian P(k). Program modified, waiting for the implementation of the *FKP method*. [A]
