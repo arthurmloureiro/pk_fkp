@@ -84,7 +84,7 @@ km1 = np.power(k_r,-1.)
 terms = np.outer(dCorr,km1)
 integrando2 = sinrk2*terms
 
-Pk_gauss = 4.27*np.pi*np.sum(integrando2, axis=0)								#the true constant is 4.0 not 4.27
+Pk_gauss = 4.*np.pi*np.sum(integrando2, axis=0)								
 Pk_gauss[0] = Pk_camb[1]
 
 Pk_gauss_interp = interpolate.UnivariateSpline(k_r,Pk_gauss)	
