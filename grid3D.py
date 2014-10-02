@@ -38,7 +38,7 @@ class grid3d:
 		kz0 = (2*np.pi)/L_z
 		
 		###################################################################
-		# it has to be up to m/2 + 1 because of the structure of np.arange
+		# see numpy documentation for np.fft.fftfreq details
 		###################################################################
 		self.k_x = (n_x)*np.fft.fftfreq(n_x)*kx0
 		identx = np.ones_like(self.k_x)
@@ -58,19 +58,19 @@ class grid3d:
 		####################################################		
 		# Generating a grid a real space, uses grid unities
 		####################################################
-		r_x = np.arange(n_x)#*(L_x/n_x)
-		r_y = np.arange(n_y)#*(L_y/n_y)
-		r_z = np.arange(n_z)#*(L_z/n_z)
+		r_x = np.arange(n_x)+50#*(L_x/n_x)
+		r_y = np.arange(n_y)+50#*(L_y/n_y)
+		r_z = np.arange(n_z)+50#*(L_z/n_z)
 		self.RX2 = np.einsum('i,j,k', r_x*r_x,identx,identx)
 		self.RY2 = np.einsum('i,j,k', identy,r_y*r_y,identy)
 		self.RZ2 = np.einsum('i,j,k', identz,identz,r_z*r_z)
 		self.grid_r = np.sqrt(self.RX2 + self.RY2 + self.RZ2)
 
 
-		pl.figure("Matriz de k")
+#		pl.figure("Matriz de k")
 
 #		self.plot = pl.imshow(self.matrix[3], cmap=cm.jet)
-		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)#, interpolation="nearest")
+#		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)#, interpolation="nearest")
 #		pl.colorbar()
 		#self.plothist = pl.imshow(self.hist[3], cmap=cm.jet)
 		#pl.show()
