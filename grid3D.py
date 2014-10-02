@@ -67,10 +67,10 @@ class grid3d:
 		self.grid_r = np.sqrt(self.RX2 + self.RY2 + self.RZ2)
 
 
-		pl.figure("Matriz de k")
+#		pl.figure("Matriz de k")
 
 #		self.plot = pl.imshow(self.matrix[3], cmap=cm.jet)
-		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)#, interpolation="nearest")
+#		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)#, interpolation="nearest")
 #		pl.colorbar()
 		#self.plothist = pl.imshow(self.hist[3], cmap=cm.jet)
 		#pl.show()
