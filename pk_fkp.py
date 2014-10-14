@@ -20,8 +20,8 @@ init = clock()
 #################################################
 # Reading the input file and converting the data
 #################################################
-camb_file, cell_size, n_x, n_y, n_z, num_realiz, bias, num_bins, n_bar0, realiz_type = np.loadtxt('input.dat', dtype=str)
-cell_size = float(cell_size); n_x=int(n_x); n_y=int(n_y); n_z=int(n_z); num_realiz=int(num_realiz); bias=float(bias) ; num_bins=int(num_bins); realiz_type = int(realiz_type); n_bar0 = float(n_bar0);
+camb_file, cell_size, n_x, n_y, n_z, num_realiz, bias, num_bins, n_bar, realiz_type = np.loadtxt('input.dat', dtype=str)
+cell_size = float(cell_size); n_x=int(n_x); n_y=int(n_y); n_z=int(n_z); num_realiz=int(num_realiz); bias=float(bias) ; num_bins=int(num_bins); realiz_type = int(realiz_type); n_bar = float(n_bar);
 
 ######################
 # Reading CAMB's file
@@ -81,7 +81,7 @@ rkr = np.outer(r_k,k_r)
 sinrk2 = np.sin(rkr)
 drCorr = dr*r_k*corr_g
 km1 = np.power(k_r,-1.)
-terms = np.outer(dCorr,km1)
+terms = np.outer(drCorr,km1)
 integrando2 = sinrk2*terms
 
 Pk_gauss = 4.*np.pi*np.sum(integrando2, axis=0)								
@@ -158,13 +158,13 @@ if realiz_type == 1:
 		###########################
 		# Log-Normal Density Field
 		###########################
-		delta_xr = delta_x_ln(delta_xr_g, var_gr)
-		delta_xi = delta_x_ln(delta_xi_g, var_gi)
+		delta_xr = delta_x_ln(delta_xr_g, var_gr,bias)
+		delta_xi = delta_x_ln(delta_xi_g, var_gi,bias)
 		#######################
 		#poissonian realization
 		#######################
 		N_r = np.random.poisson(n_bar*(1.+delta_xr)*(cell_size**3.))			     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar0*(1.+delta_xi)*(cell_size**3.))
+		N_i = np.random.poisson(n_bar*(1.+delta_xi)*(cell_size**3.))
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
 		##########################################
@@ -183,14 +183,14 @@ elif realiz_type == 2:
 	###########################
 	# Log-Normal Density Field
 	###########################
-	delta_xr = delta_x_ln(delta_xr_g, var_gr)
-	delta_xi = delta_x_ln(delta_xi_g, var_gi)
+	delta_xr = delta_x_ln(delta_xr_g, var_gr,bias)
+	delta_xi = delta_x_ln(delta_xi_g, var_gi,bias)
 	for m in range(num_realiz):
 		#######################
 		#poissonian realization
 		#######################
 		N_r = np.random.poisson(n_bar*(1.+delta_xr)*(cell_size**3.))     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar0*(1.+delta_xi)*(cell_size**3.))
+		N_i = np.random.poisson(n_bar*(1.+delta_xi)*(cell_size**3.))
 #		n_bar0_new = np.mean(N_r)
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
@@ -206,8 +206,6 @@ print "time = " + str(final - inicial)
 pl.figure()
 pl.imshow(N_r[0], cmap=cm.jet)
 pl.show()
-
-
 
 
 
