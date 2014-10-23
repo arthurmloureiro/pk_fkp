@@ -37,9 +37,9 @@ class grid3d:
 		ky0 = (2*np.pi)/L_y
 		kz0 = (2*np.pi)/L_z
 		
-		###################################################################
-		# it has to be up to m/2 + 1 because of the structure of np.arange
-		###################################################################
+		##################
+		# grid in k space
+		##################
 		self.k_x = (n_x)*np.fft.fftfreq(n_x)*kx0
 		identx = np.ones_like(self.k_x)
 
@@ -67,10 +67,10 @@ class grid3d:
 		self.grid_r = np.sqrt(self.RX2 + self.RY2 + self.RZ2)
 
 
-		pl.figure("Matriz de k")
+#		pl.figure("Matriz de k")
 
 #		self.plot = pl.imshow(self.matrix[3], cmap=cm.jet)
-		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)#, interpolation="nearest")
+#		self.plot = pl.imshow(self.grid_r[3], cmap=cm.jet)#, interpolation="nearest")
 #		pl.colorbar()
 		#self.plothist = pl.imshow(self.hist[3], cmap=cm.jet)
 		#pl.show()

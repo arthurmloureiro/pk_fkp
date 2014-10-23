@@ -163,8 +163,8 @@ if realiz_type == 1:
 		#######################
 		#poissonian realization
 		#######################
-		N_r = np.random.poisson(n_bar*(1.+delta_xr)*(cell_size**3.))			     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar*(1.+delta_xi)*(cell_size**3.))
+		N_r = np.random.poisson(n_bar*(1.+delta_xr))#*(cell_size**3.))			     # This is the final galaxy Map
+		N_i = np.random.poisson(n_bar*(1.+delta_xi))#*(cell_size**3.))
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#
 		##########################################
@@ -189,8 +189,8 @@ elif realiz_type == 2:
 		#######################
 		#poissonian realization
 		#######################
-		N_r = np.random.poisson(n_bar*(1.+delta_xr)*(cell_size**3.))     # This is the final galaxy Map
-		N_i = np.random.poisson(n_bar*(1.+delta_xi)*(cell_size**3.))
+		N_r = np.random.poisson(n_bar*(1.+delta_xr))#*(cell_size**3.))     # This is the final galaxy Map
+		N_i = np.random.poisson(n_bar*(1.+delta_xi))#*(cell_size**3.))
 #		n_bar0_new = np.mean(N_r)
 		##########################################
 		#$%%$ AQUI SEGUE O CÓDIGO PARA O FKP $%%$#

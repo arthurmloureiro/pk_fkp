@@ -7,7 +7,7 @@
 ##############################################
 # Insert CAMB's Power Spectra file name here:
 ##############################################
-fid_matterpower.dat
+fid2_matterpower.dat
 
 ##############################
 # Size of the cell in h^-1Mpc
@@ -47,7 +47,7 @@ fid_matterpower.dat
 #############################################
 # Medium number of galaxies per cell (n_bar)
 #############################################
-30.
+3.
 
 ################################################
 # Which kind of realizations to very? 
@@ -57,4 +57,3 @@ fid_matterpower.dat
 
 
 # MUST IMPLEMENT THE SELECTION FUNCTION HERE
-
