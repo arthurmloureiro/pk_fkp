@@ -5,7 +5,7 @@ import numpy as np
 
 def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
     
-    phsize=cell_size*n_x #physical size of the side of the (assumed square) grid
+    phsize=float(cell_size*n_x) #physical size of the side of the (assumed square) grid
     
     ng=gridname #the galaxy field to be analyzed
     n_bar_matrix = np.ones((n_x,n_x,n_x))*n_bar #the 3D version of n_bar
@@ -38,7 +38,8 @@ def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
     krfft2=krfft**2
     kNy=kmaxfft #Nyquist frequency
 
-    k_bins=np.linspace(kmin,kmax,num_bins) #edges of the bins in which P(k) will be estimated
+    k_bins=np.linspace(kmin,kmax,num_bins-1) #edges of the bins in which P(k) will be estimated
+    delta_k=k_bins[4]-k_bins[3]
 
 
     F=(w/(N*bias)) * (ng-alpha*nr) #overdensity field, eq. 6 in PVP
@@ -47,8 +48,8 @@ def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
 
     print '\nTaking Fourier transform of the overdensity field'
 
-    Fk=np.fft.fftn(F) #numpy.fft is in the same Fourier convention of PVP - no extra normalization needed
-
+    Fk=np.fft.rfftn(F) #numpy.fft is in the same Fourier convention of PVP - no extra normalization needed
+    Fk=Fk
     Fk2=(Fk*Fk.conj()).real #square of the absolute value
 
     ###############################################################
@@ -63,8 +64,9 @@ def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
                 for j in range(len(kfft)):
         		ky2=kfft[j]**2
            
-        		k_sum = np.sqrt(kx2 + ky2 + krfft2) - 0.000001 #absolute value of k
-			m = np.digitize(k_sum,k_bins) #finds which bin the absolute value is in
+        		k_sum = np.sqrt(kx2 + ky2 + krfft2) #absolute value of k
+                        m = np.asarray(k_sum/delta_k-0.000001).astype(int)
+			#m = np.digitize(k_sum,k_bins) #finds which bin the absolute value is in
          
         		zcounter=0
         		for ind in m: #iterating over the indices to attribute the power to the correct bins
@@ -107,17 +109,19 @@ def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
     k=np.zeros(len(P_ret))
     for i in range(len(k_bins)-1): #power in the center of the bin
         k[i]=(k_bins[i]+k_bins[i+1])/2.0
-
+    
+    #print k,P_ret,sigma,Pshot
     #changing to physical units
     sigma=sigma*((phsize/n_x)**3)
     P_ret=P_ret*((phsize/n_x)**3) 
     Pshot=Pshot*((phsize/n_x)**3) 
-    k=k*(2*np.pi*n_x/phsize) 
+    k=k*(2*np.pi*n_x/phsize)
+    #print k,P_ret,sigma,Pshot
    
 
     #eliminating the first 2 and last value, which are problematic, should be fixed
-    P_ret=P_ret[2:-1]
-    k=k[2:-1]
-    sigma=sigma[2:-1]
+    P_ret=P_ret[1:]
+    k=k[1:]
+    sigma=sigma[1:]
 
     return (k,P_ret,sigma)
