@@ -98,8 +98,10 @@ print "P_g(k) time = " + str(time)
 ###############################################################
 print("\nCalculating the P(k)-Grid...\n")
 init=clock()
-Pkg_vec = np.vectorize(Pk_gauss_interp)
-p_matrix = Pkg_vec(grid.grid_k)
+k_flat = grid.grid_k.flatten()
+Pk_flat = Pk_gauss_interp(k_flat)
+#print k_flat.reshape((n_x,n_y,n_z))==grid.grid_k
+p_matrix = Pk_flat.reshape((n_x,n_y,n_z))
 fin=clock()
 print '--p_matrix took',fin-init,'seconds'
 p_matrix[0][0][0] = 1. 						     # Needs to be 1.
