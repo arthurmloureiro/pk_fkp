@@ -7,12 +7,12 @@
 ##############################################
 # Insert CAMB's Power Spectra file name here:
 ##############################################
-fid2_matterpower.dat
+fid_map_matterpower.dat
 
 ##############################
 # Size of the cell in h^-1Mpc
 ##############################
-18.10
+15.10
 
 #######################################################
 # Number of cells in the X direction (must be integer)
@@ -32,7 +32,7 @@ fid2_matterpower.dat
 ###########################################
 # Number of realizations (must be integer)
 ###########################################
-50
+1
 
 #######
 # Bias

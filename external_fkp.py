@@ -4,7 +4,7 @@ from time import clock
 import numpy as np
 
 def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
-    
+    time1 = clock()
     phsize=float(cell_size*n_x) #physical size of the side of the (assumed square) grid
     
     ng=gridname #the galaxy field to be analyzed
@@ -40,7 +40,8 @@ def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
 
     k_bins=np.linspace(kmin,kmax,num_bins-1) #edges of the bins in which P(k) will be estimated
     delta_k=k_bins[4]-k_bins[3]
-
+    time2 = clock()
+    print "Time blablablabla = " + str(time2-time1)
 
     F=(w/(N*bias)) * (ng-alpha*nr) #overdensity field, eq. 6 in PVP
 
@@ -60,20 +61,20 @@ def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
     init=clock()
 
     for i in range(len(kfft)):
-            	kx2=kfft[i]**2
-                for j in range(len(kfft)):
-        		ky2=kfft[j]**2
+        kx2=kfft[i]**2
+        for j in range(len(kfft)):
+            ky2=kfft[j]**2
            
-        		k_sum = np.sqrt(kx2 + ky2 + krfft2) #absolute value of k
-                        m = np.asarray(k_sum/delta_k-0.000001).astype(int)
+            k_sum = np.sqrt(kx2 + ky2 + krfft2) #absolute value of k
+            m = np.asarray(k_sum/delta_k-0.000001).astype(int)
 			#m = np.digitize(k_sum,k_bins) #finds which bin the absolute value is in
          
-        		zcounter=0
-        		for ind in m: #iterating over the indices to attribute the power to the correct bins
+            zcounter=0
+            for ind in m: #iterating over the indices to attribute the power to the correct bins
                             #print 'ind=',ind,'zcounter=',zcounter,'Pshape=',P_ret.shape
-                            P_ret[ind]=P_ret[ind]+Fk2[i,j,zcounter]
-                            counts[ind]=counts[ind]+1
-                            zcounter=zcounter+1
+                    P_ret[ind]=P_ret[ind]+Fk2[i,j,zcounter]
+                    counts[ind]=counts[ind]+1
+                    zcounter=zcounter+1
           
     fin=clock()
     print '---averaging over shells in k-space took',fin-init,'seconds'
@@ -123,5 +124,5 @@ def FKP(gridname,num_bins,n_bar,bias,cell_size,n_x):
     P_ret=P_ret[1:]
     k=k[1:]
     sigma=sigma[1:]
-
+    
     return (k,P_ret,sigma)
