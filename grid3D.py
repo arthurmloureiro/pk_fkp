@@ -13,8 +13,8 @@
 """
 import numpy as np
 import pylab as pl
-from mpl_toolkits.mplot3d.axes3d import Axes3D
-from matplotlib import cm
+#from mpl_toolkits.mplot3d.axes3d import Axes3D
+#from matplotlib import cm
 ####################################################
 # Uncomment the line above and the last three lines 
 # if you have matplotlib and want to see the grid
@@ -37,16 +37,19 @@ class grid3d:
 		ky0 = (2*np.pi)/L_y
 		kz0 = (2*np.pi)/L_z
 		
-		###################################################################
-		# it has to be up to m/2 + 1 because of the structure of np.arange
-		###################################################################
-		self.k_x = (n_x)*np.fft.fftfreq(n_x)*kx0
+		##################
+		# grid in k space
+		##################
+		#self.k_x = (n_x)*np.fft.fftfreq(n_x)*kx0 #<<<<<<<<<<<<<<< kx0 ??????
+		self.k_x = np.fft.fftfreq(n_x)
 		identx = np.ones_like(self.k_x)
 
-		self.k_y = (n_y)*np.fft.fftfreq(n_y)*ky0
+		#self.k_y = (n_y)*np.fft.fftfreq(n_y)*ky0
+		self.k_y = np.fft.fftfreq(n_y)
 		identy = np.ones_like(self.k_y)	
 
-		self.k_z = (n_z)*np.fft.fftfreq(n_z)*kz0
+		#self.k_z = (n_z)*np.fft.fftfreq(n_z)*kz0
+		self.k_z = np.fft.fftfreq(n_z)
 		identz = np.ones_like(self.k_z)	
 		
 		self.KX2 = np.einsum('i,j,k', self.k_x*self.k_x,identx,identx)

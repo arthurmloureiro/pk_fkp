@@ -87,7 +87,8 @@ class fkp_init(object):
         rel_var2=np.zeros(len(P_ret)) #initializing relative variance vector
 
         #nbarw2=(self.n_bar_matrix*self.w)**2
-        pifactor=((2*np.pi)**3)/(self.N**4 +small) #useful expressions
+        #pifactor=((2*np.pi)**3)/(self.N**4 +small) #useful expressions
+        pifactor=1./(self.N**4 +small) #useful expressions
         #nbarwb2=(self.n_bar_matrix)*((self.w/self.bias)**2)
         #for i in range(len(P_ret)):
         #	rel_var2[i]=( (pifactor) * np.sum( (nbarw2 + nbarwb2/P_ret[i])**2 )) #eq. 26 from PVP, except for the V_k term, which I include a few lines ahead
@@ -119,18 +120,3 @@ class fkp_init(object):
         #self.kk=k
         self.sigma=sigma
         self.Fk = Fk
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
