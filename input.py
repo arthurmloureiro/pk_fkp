@@ -14,19 +14,16 @@ cell_size = 20.00
 n_x,n_y,n_z = 64,64,64
 
 # Number of Tracers:
-n_tracers = 3
+n_tracers = 1
 
 # Bias for each tracer:
-bias = [1.,2.0,1.5]
+bias = [1]
 
 # Mean galaxy number / cell for each tracer:
-n_bar0 = [8.,10.,12.]
+n_bar0 = [5.]
 
 #Number of realizations (must be integer)
 num_realiz = 1
 
-################################################
-# Which kind of realizations to vary? 
-#(1) Gaussian + Poissonian (2) Poissonian Only
-################################################
-realiz_type = 1
+# map file's root:
+file_root = "g_bias"
