@@ -2,11 +2,13 @@
 # -*- coding: utf-8 -*-
 """
     Class for the FKP code developed by Lucas F. Secco(IFUSP)
+    Important Modifications by prof. Abramo for a new M matrix 
     Arthur E. da Mota Loureiro(IFUSP)
     04/11/2014
 """
 from time import clock
 import numpy as np
+from scipy.sparse import csc_matrix
     
 class fkp_init(object):
     '''
@@ -17,6 +19,7 @@ class fkp_init(object):
     n_x,n_y, n_z and the bin_matrix
     '''
     def __init__(self,num_bins,n_bar_matrix,bias,cell_size,n_x,n_y,n_z,bin_matrix):    
+        # Here bin_matrix is the M-matrix
         self.num_bins = num_bins
         self.n_bar_matrix = n_bar_matrix
         self.bias = bias
@@ -61,16 +64,25 @@ class fkp_init(object):
         Fk=np.fft.rfftn(self.F) #numpy.fft is in the same Fourier convention of PVP - no extra normalization needed
         #Fk=np.fft.fftn(self.F) #numpy.fft is in the same Fourier convention of PVP - no extra
         Fk=Fk                   #?????????
-        #Fk2=(Fk*Fk.conj()).real #square of the absolute value
+        Fkflat = np.ndarray.flatten(Fk[:,:,:self.n_z/2+1])  #Raul
+        lenkf = len(Fkflat)                                 #Raul
+        Fkf2=(Fkflat*(Fkflat.conj())).real #square of the absolute value - Raul
 
         ###############################################################
         #P_ret=np.zeros(self.num_bins) #initializing the Power Spectrum that will be the output of the external function
         counts=np.ones(self.num_bins) #initializing the vector that averages over modes within a bin 
         init=clock()
-        self.counts2 = np.einsum("aijl->a", self.bin_matrix)
-        counts = np.einsum("aijl->a", self.bin_matrix)
+        
+        # Here are the operations involving the M-matrix = bin_matrix) - Raul
+        #self.counts2 = np.einsum("aijl->a", self.bin_matrix)
+        #counts = np.einsum("aijl->a", self.bin_matrix)  # number of points in each bin a
+        counts = (self.bin_matrix).dot(np.ones(lenkf))
         self.counts = counts
-        P_ret = np.einsum("aijl,ijl,ijl->a", self.bin_matrix, Fk, np.conj(Fk))/(np.einsum("aijl->a", self.bin_matrix) + small)
+        
+        # This is <|F(k)|^2> on bins [a] - Raul
+        P_ret = ((self.bin_matrix).dot(Fkf2))/(self.counts)
+        # P_ret = np.einsum("aijl,ijl,ijl->a", self.bin_matrix, Fk, np.conj(Fk))/(np.einsum("aijl->a", self.bin_matrix) + small)
+
         fin=clock()
         #print '---averaging over shells in k-space took',fin-init,'seconds'
 
@@ -79,6 +91,7 @@ class fkp_init(object):
         for i in range(len(P_ret)):
         	if np.sign(P_ret[i])==-1:
         		P_ret[i]=0.0
+        #P_ret[ np.where(P_ret < 0.0) ] = 0.0
         ###############################################################
 
         #print '\nCalculating error bars'
@@ -88,7 +101,7 @@ class fkp_init(object):
 
         #nbarw2=(self.n_bar_matrix*self.w)**2
         #pifactor=((2*np.pi)**3)/(self.N**4 +small) #useful expressions
-        pifactor=1./(self.N**4 +small) #useful expressions
+        pifactor=1./(self.N**4 +small)
         #nbarwb2=(self.n_bar_matrix)*((self.w/self.bias)**2)
         #for i in range(len(P_ret)):
         #	rel_var2[i]=( (pifactor) * np.sum( (nbarw2 + nbarwb2/P_ret[i])**2 )) #eq. 26 from PVP, except for the V_k term, which I include a few lines ahead
@@ -120,3 +133,4 @@ class fkp_init(object):
         #self.kk=k
         self.sigma=sigma
         self.Fk = Fk
+		
